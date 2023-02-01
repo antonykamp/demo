@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, url_for
 from orm_importer.importer import ORMImporter
 from planproexporter import Generator
 from railwayroutegenerator.generator import generate_from_topology
-
+from sumoexporter import SUMOExporter
 app = Flask(__name__)
 
 
@@ -22,6 +22,12 @@ def run_converter():
             return Generator().generate(topology), 200
         case "routes":
             return generate_from_topology(topology), 200
+        case "sumo":
+            topology.name = "orm-import-sumo" + "-".join(polygon.split(" "))
+            sumo_exporter = SUMOExporter(topology)
+            sumo_exporter.convert()
+            sumo_exporter.write_output()
+            return "success", 200
         case _:
             return 'No mode specified', 400
 
